@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
+import 'Widgets/dice_img.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int leftDice = 1;
   int rightDice = 1;
+  bool rolling = false;
   final Random random = Random();
 
   @override
@@ -36,11 +39,10 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/dice$leftDice.png", width: 120),
-
+                    DiceImg(diceNum: leftDice),
                     const SizedBox(width: 20),
+                    DiceImg(diceNum: rightDice),
 
-                    Image.asset("assets/images/dice$rightDice.png", width: 120),
                   ],
                 ),
 
@@ -48,14 +50,37 @@ class _MyAppState extends State<MyApp> {
 
                 ElevatedButton(
                   onPressed: () {
+                    if(rolling){
+                      return;
+                    }
                     setState(() {
-                      leftDice = random.nextInt(6) + 1;
-                      rightDice = random.nextInt(6) + 1;
+                      rolling = true;
                     });
+                    int count =0;
+                    Timer.periodic(
+                        const Duration(milliseconds: 100),
+                        (timer){
+                          bool stop = false;
+                          setState(() {
+                            leftDice = random.nextInt(6) + 1;
+                            rightDice = random.nextInt(6) + 1;
+
+                            count++;
+
+                            if(count>=10){
+                              stop = true;
+                              rolling = false;
+                            }
+                          });
+                         if(stop){
+                           timer.cancel();
+                         }
+                        },
+                    );
                   },
-                  child: const Text(
-                    "Roll Dice",
-                    style: TextStyle(fontSize: 22),
+                  child: Text(
+                    rolling? "Rolling..." : "Roll Dice",
+                    style: const TextStyle(fontSize: 22),
                   ),
                 ),
               ],
