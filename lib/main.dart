@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'Widgets/dice_img.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +22,17 @@ class _MyAppState extends State<MyApp> {
   int rightDice = 1;
   bool rolling = false;
   final Random random = Random();
+  // final AudioPlayer player = AudioPlayer();
+  final List<String> diceSounds = [
+    'sounds/dice_roll1.mp3',
+    'sounds/dice_roll2.mp3'
+  ];
+
+  // @override
+  // void initState(){
+  //   super.initState();
+  //   player.setReleaseMode(ReleaseMode.stop);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +60,28 @@ class _MyAppState extends State<MyApp> {
 
                 const SizedBox(height: 20),
 
+
+
+
                 ElevatedButton(
-                  onPressed: () {
-                    if(rolling){
-                      return;
-                    }
+                  onPressed: () async {
+
+                    if(rolling) return;
+
+                    final player = AudioPlayer();
+
+
+                    String selectedSound = diceSounds[random.nextInt(diceSounds.length)];
+
                     setState(() {
                       rolling = true;
                     });
+
+                    await player.play(
+                      AssetSource(selectedSound),);
+
+                    await player.dispose();
+
                     int count =0;
                     Timer.periodic(
                         const Duration(milliseconds: 100),
