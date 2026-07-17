@@ -23,6 +23,7 @@ class _DiceScreenState extends State<DiceScreen>
   late Animation<double> rotationAnimation;
   late Animation<double> reverserotationAnimation;
   late Animation<double> bounceAnimation;
+  late Animation<double> scaleAnimation;
   final Random random = Random();
   final List<String> diceSounds = [
     'sounds/dice_roll1.mp3',
@@ -38,24 +39,25 @@ class _DiceScreenState extends State<DiceScreen>
       duration: const Duration(seconds: 1),
     );
 
-    rotationAnimation =Tween<double>(
+    rotationAnimation = Tween<double>(
       begin: 0,
       end: 5,
-    ).animate(
-      CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOut
-      ),);
-    
-    
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+
     reverserotationAnimation = Tween<double>(
       begin: 0,
       end: -5,
-    ).animate(
-      CurvedAnimation(parent: controller, curve: Curves.easeOut),
-    );
-    
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
 
+    bounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -12.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: -12.0, end: 0.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+
+    scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 60),
+    ]).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
   }
 
   @override
@@ -80,14 +82,39 @@ class _DiceScreenState extends State<DiceScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  RotationTransition(
+                  AnimatedBuilder(
+                    animation: bounceAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, bounceAnimation.value),
+                        child: child,
+                      );
+                    },
+                    child: RotationTransition(
                       turns: rotationAnimation,
-                  child: DiceImg(diceNum: leftDice),),
-                  
+                      child: ScaleTransition(
+                        scale: scaleAnimation,
+                        child: DiceImg(diceNum: leftDice),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(width: 30),
 
-                  RotationTransition(turns: reverserotationAnimation,
-                  child: DiceImg(diceNum: rightDice),),
+                  AnimatedBuilder(
+                    animation: bounceAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, bounceAnimation.value),
+                        child: child,
+                      );
+                    },
+                  ),
+                  RotationTransition(
+                    turns: reverserotationAnimation,
+                    child: ScaleTransition(scale: scaleAnimation,
+                      child: DiceImg(diceNum: rightDice),),
+                  ),
                 ],
               ),
 
