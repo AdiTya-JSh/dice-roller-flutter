@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -109,12 +108,12 @@ class _DiceScreenState extends State<DiceScreen>
                         child: child,
                       );
                     },
-                  ),
-                  RotationTransition(
+
+                  child: RotationTransition(
                     turns: reverserotationAnimation,
                     child: ScaleTransition(scale: scaleAnimation,
                       child: DiceImg(diceNum: rightDice),),
-                  ),
+                  ),),
                 ],
               ),
 
@@ -131,12 +130,11 @@ class _DiceScreenState extends State<DiceScreen>
 
                   setState(() {
                     rolling = true;
-                    controller.forward(from: 0);
                   });
+                  controller.forward(from: 0);
 
-                  await player.play(AssetSource(selectedSound));
+                  player.play(AssetSource(selectedSound));
 
-                  await player.dispose();
 
                   int count = 0;
                   Timer.periodic(const Duration(milliseconds: 30), (timer) {
@@ -149,11 +147,13 @@ class _DiceScreenState extends State<DiceScreen>
 
                       if (count >= 33) {
                         stop = true;
+                        controller.reset();
                         rolling = false;
                       }
                     });
                     if (stop) {
                       timer.cancel();
+                      player.dispose();
                     }
                   });
                 },
